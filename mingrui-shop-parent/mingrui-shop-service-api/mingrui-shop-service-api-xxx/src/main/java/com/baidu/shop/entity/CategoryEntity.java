@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
 /**
  * @ClassName CategoryEntity
  * @Description: TODO
- * @Author wangshanle
+ * @Author jinluying
  * @Date 2020/8/27
  * @Version V1.0
  **/

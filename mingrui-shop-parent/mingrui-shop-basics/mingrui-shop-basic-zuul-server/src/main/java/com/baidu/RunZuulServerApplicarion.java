@@ -3,21 +3,20 @@ package com.baidu;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
-import tk.mybatis.spring.annotation.MapperScan;
+import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
 
 /**
- * @ClassName RunXXXApplication
- * @Description: TODO
+ * @ClassName RunZuulServerApplicarion
+ * @Description: RunZuulServerApplicarion
  * @Author jinluying
- * @Date 2020/8/27
+ * @create: 2020-08-28 09:39
  * @Version V1.0
  **/
 @SpringBootApplication
+@EnableZuulProxy
 @EnableEurekaClient
-@MapperScan("com.baidu.mapper")
-public class RunXXXApplication {
-
+public class RunZuulServerApplicarion {
     public static void main(String[] args) {
-        SpringApplication.run(RunXXXApplication.class);
+        SpringApplication.run(RunZuulServerApplicarion.class);
     }
 }
