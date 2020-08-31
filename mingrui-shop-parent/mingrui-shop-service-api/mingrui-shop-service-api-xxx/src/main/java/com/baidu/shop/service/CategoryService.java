@@ -7,10 +7,7 @@ import com.google.gson.JsonObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import jdk.nashorn.internal.scripts.JS;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,7 +19,7 @@ public interface CategoryService {
     Result<List<CategoryEntity>> getCategoryByPid(Integer pid);
 
     @ApiOperation(value = "通过id删除分类")
-    @GetMapping("category/del")
+    @DeleteMapping("category/del")
     public Result<JsonObject> delCategory(Integer id);
 
     @PutMapping("category/edit")
