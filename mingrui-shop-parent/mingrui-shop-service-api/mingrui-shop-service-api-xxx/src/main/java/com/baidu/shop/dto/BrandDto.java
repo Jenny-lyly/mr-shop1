@@ -25,7 +25,7 @@ public class BrandDto extends BaseDto {
     private Integer id;
 
     @ApiModelProperty(value = "品牌名称")
-    @NotEmpty(message = "品牌名称不能为空",groups = {MrOperation.Add.class,MrOperation.Update.class})
+    @NotEmpty(message = "品牌名称不能为空",groups = {MrOperation.Add.class})
     private String name;
 
     @ApiModelProperty(value = "品牌logo")
@@ -33,4 +33,8 @@ public class BrandDto extends BaseDto {
 
     @ApiModelProperty(value = "品牌首字母")
     private Character letter;
+
+    @ApiModelProperty(value = "品牌分类信息")
+    @NotEmpty(message = "品牌分类信息不能为空", groups = {MrOperation.Add.class})
+    private String category;
 }
