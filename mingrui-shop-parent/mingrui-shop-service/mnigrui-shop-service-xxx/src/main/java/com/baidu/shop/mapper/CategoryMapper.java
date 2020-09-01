@@ -1,4 +1,4 @@
-package com.baidu.mapper;
+package com.baidu.shop.mapper;
 
 import com.baidu.shop.entity.CategoryEntity;
 import tk.mybatis.mapper.common.Mapper;
@@ -10,7 +10,7 @@ import tk.mybatis.mapper.common.Mapper;
  * @Date 2020/8/27
  * @Version V1.0
  **/
-
+@org.apache.ibatis.annotations.Mapper
 public interface CategoryMapper extends Mapper<CategoryEntity> {
 
 }
