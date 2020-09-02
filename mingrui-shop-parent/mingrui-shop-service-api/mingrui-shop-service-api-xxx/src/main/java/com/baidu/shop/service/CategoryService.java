@@ -33,4 +33,8 @@ public interface CategoryService {
     @PostMapping(value = "category/add")
     //声明哪个组下面的参数参加校验-->当前是校验Add组
     public Result<JSONObject> addCategory(@Validated({MrOperation.Add.class}) @RequestBody CategoryEntity entity);
+
+    @GetMapping("category/getByBrand")
+    @ApiOperation(value = "通过品牌id查询商品分类")
+    public Result<List<CategoryEntity>> getByBrand(Integer brandId);
 }
