@@ -90,18 +90,31 @@ public class BrandServiceImpl extends BaseApiService implements BrandService {
 
         brandMapper.updateByPrimaryKeySelective(brandEntity);
 
-        //通过brandId删除中间表中的数据
-        Example example = new Example(CategoryBrandEntity.class);
-        example.createCriteria().andEqualTo("brandId",brandEntity.getId());
-        categoryBrandMapper.deleteByExample(example);
+        this.deleteCategoryAndBrand(brandEntity.getId());
 
-        //新增新的数据(代码优化)
         this.insertCategoryAndBrand(brandDTO,brandEntity);
 
         return this.setResultSuccess();
     }
 
-    public void insertCategoryAndBrand(BrandDto brandDTO,BrandEntity brandEntity){
+    @Override
+    public Result<JsonObject> deleteBrandInfo(Integer id) {
+        brandMapper.deleteByPrimaryKey(id);
+
+        this.deleteCategoryAndBrand(id);
+
+        return this.setResultSuccess();
+    }
+
+    private void deleteCategoryAndBrand(Integer id){
+
+        //通过brandId删除中间表中的数据
+        Example example = new Example(CategoryBrandEntity.class);
+        example.createCriteria().andEqualTo("brandId",id);
+        categoryBrandMapper.deleteByExample(example);
+    }
+
+    private void insertCategoryAndBrand(BrandDto brandDTO,BrandEntity brandEntity){
 
         if(brandDTO.getCategory().contains(",")){
 
