@@ -3,8 +3,11 @@ package com.baidu.shop.service.impl;
 import com.baidu.shop.base.BaseApiService;
 import com.baidu.shop.base.Result;
 import com.baidu.shop.dto.SpecGroupDto;
+import com.baidu.shop.dto.SpecParamDto;
 import com.baidu.shop.entity.SpecGroupEntity;
+import com.baidu.shop.entity.SpecParamEntity;
 import com.baidu.shop.mapper.SpecGroupMapper;
+import com.baidu.shop.mapper.SpecParamMapper;
 import com.baidu.shop.service.SpecificationService;
 import com.baidu.shop.utils.BaiduBeanUtil;
 import com.baidu.shop.utils.ObjectUtil;
@@ -28,6 +31,9 @@ public class SpecificationServiceImpl extends BaseApiService implements Specific
 
     @Resource
     private SpecGroupMapper specGroupMapper;
+
+    @Resource
+    private SpecParamMapper specParamMapper;
     @Override
     public Result<List<SpecGroupEntity>> getSpecInfo(SpecGroupDto specGroupDto) {
 
@@ -58,6 +64,40 @@ public class SpecificationServiceImpl extends BaseApiService implements Specific
     public Result<JsonObject> delete(Integer id) {
 
         specGroupMapper.deleteByPrimaryKey(id);
+        return this.setResultSuccess();
+    }
+
+    @Override
+    public Result<List<SpecParamEntity>> getSpecParamInfo(SpecParamDto specParamDto) {
+        if(ObjectUtil.isNull(specParamDto.getGroupId()))return this.setResultError("groupId不能为空");
+
+        Example example = new Example(SpecParamEntity.class);
+        example.createCriteria().andEqualTo("groupId",specParamDto.getGroupId());
+
+        List<SpecParamEntity> list = specParamMapper.selectByExample(example);
+        return this.setResultSuccess(list);
+    }
+
+    @Override
+    @Transactional
+    public Result<JsonObject> saveParam(SpecParamDto specParamDto) {
+
+        specParamMapper.insertSelective(BaiduBeanUtil.copyProperties(specParamDto,SpecParamEntity.class));
+        return this.setResultSuccess();
+    }
+
+    @Override
+    @Transactional
+    public Result<JsonObject> editParam(SpecParamDto specParamDto) {
+        specParamMapper.updateByPrimaryKey(BaiduBeanUtil.copyProperties(specParamDto,SpecParamEntity.class));
+        return this.setResultSuccess();
+    }
+
+    @Override
+    @Transactional
+    public Result<JsonObject> deleteParam(Integer  id) {
+
+        specParamMapper.deleteByPrimaryKey(id);
         return this.setResultSuccess();
     }
 }
