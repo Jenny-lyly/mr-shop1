@@ -80,6 +80,8 @@ public class CategoryServiceImpl extends BaseApiService implements CategoryServi
             return this.setResultError(HTTPStatus.OPERATION_ERROR,"当前节点为父节点");
         }
 
+
+
         //构建条件查询 通过当前被删除节点的parentid查询数据
         Example example = new Example(CategoryEntity.class);
         example.createCriteria().andEqualTo("parentId",categoryEntity.getParentId());
