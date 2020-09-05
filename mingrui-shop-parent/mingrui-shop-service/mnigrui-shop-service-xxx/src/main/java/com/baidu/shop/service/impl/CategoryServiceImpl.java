@@ -1,6 +1,8 @@
 package com.baidu.shop.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baidu.shop.entity.CategoryBrandEntity;
+import com.baidu.shop.mapper.BrandCategoryMapper;
 import com.baidu.shop.mapper.CategoryMapper;
 import com.baidu.shop.base.BaseApiService;
 import com.baidu.shop.base.Result;
@@ -28,7 +30,6 @@ public class CategoryServiceImpl extends BaseApiService implements CategoryServi
 
     @Resource
     private CategoryMapper categoryMapper;
-
 
 
     @Override
@@ -77,14 +78,24 @@ public class CategoryServiceImpl extends BaseApiService implements CategoryServi
         }
 
         if(categoryEntity.getIsParent() == 1){
-            return this.setResultError(HTTPStatus.OPERATION_ERROR,"当前节点为父节点");
+            return this.setResultError(HTTPStatus.OPERATION_ERROR,"当前节点为父节点,不能删除");
         }
 
+        Integer count = categoryMapper.getByCategoryId(id);
+        if(count > 0){
+            return this.setResultError(HTTPStatus.OPERATION_ERROR,"当前分类被品牌绑定,不能删除");
+        }
+
+        Integer count1 = categoryMapper.getSepcGroup(id);
+        if(count1 > 0){
+            return this.setResultError(HTTPStatus.OPERATION_ERROR,"当前分类被规格组绑定,不能删除");
+        }
 
 
         //构建条件查询 通过当前被删除节点的parentid查询数据
         Example example = new Example(CategoryEntity.class);
         example.createCriteria().andEqualTo("parentId",categoryEntity.getParentId());
+
         List<CategoryEntity> list = categoryMapper.selectByExample(example);
 
         //判断查询结果
@@ -100,7 +111,6 @@ public class CategoryServiceImpl extends BaseApiService implements CategoryServi
 
         categoryMapper.deleteByPrimaryKey(id);
 
-
         return this.setResultSuccess();
     }
 
@@ -108,7 +118,7 @@ public class CategoryServiceImpl extends BaseApiService implements CategoryServi
     @Transactional
     public Result<JSONObject> editCategory(CategoryEntity entity) {
 
-            categoryMapper.updateByPrimaryKeySelective(entity);
+        categoryMapper.updateByPrimaryKeySelective(entity);
 
         return this.setResultSuccess();
     }

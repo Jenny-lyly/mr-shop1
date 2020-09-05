@@ -9,6 +9,7 @@ import com.baidu.shop.entity.SpecParamEntity;
 import com.baidu.shop.mapper.SpecGroupMapper;
 import com.baidu.shop.mapper.SpecParamMapper;
 import com.baidu.shop.service.SpecificationService;
+import com.baidu.shop.status.HTTPStatus;
 import com.baidu.shop.utils.BaiduBeanUtil;
 import com.baidu.shop.utils.ObjectUtil;
 import com.google.gson.JsonObject;
@@ -62,7 +63,12 @@ public class SpecificationServiceImpl extends BaseApiService implements Specific
     @Override
     @Transactional
     public Result<JsonObject> delete(Integer id) {
-
+        Example example = new Example(SpecParamEntity.class);
+        example.createCriteria().andEqualTo("groupId",id);
+        List<SpecParamEntity> list = specParamMapper.selectByExample(example);
+        if(list.size() != 0){
+            return this.setResultError(HTTPStatus.OPERATION_ERROR,"当前规格被参数绑定,不能删除");
+        }
         specGroupMapper.deleteByPrimaryKey(id);
         return this.setResultSuccess();
     }
