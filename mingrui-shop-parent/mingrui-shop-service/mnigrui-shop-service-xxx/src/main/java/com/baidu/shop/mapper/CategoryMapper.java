@@ -1,5 +1,6 @@
 package com.baidu.shop.mapper;
 
+import com.baidu.shop.dto.SpuDTO;
 import com.baidu.shop.entity.CategoryEntity;
 import org.apache.ibatis.annotations.Select;
 import tk.mybatis.mapper.additional.idlist.SelectByIdListMapper;
@@ -27,4 +28,7 @@ public interface CategoryMapper extends Mapper<CategoryEntity>, SelectByIdListMa
     @Select(value = "select count(1) from tb_spec_group  where cid = #{id}")
     Integer getSepcGroup(Integer id);
 
+    @Select(value = "select group_concat(`name` separator \'/\') categoryName from tb_category " +
+            "where id in(#{cid1},#{cid2},#{cid3})")
+    String getCategoryName(Integer cid1, Integer cid2, Integer cid3);
 }

@@ -11,12 +11,14 @@ import com.baidu.shop.mapper.BrandMapper;
 import com.baidu.shop.mapper.CategoryMapper;
 import com.baidu.shop.mapper.SpuMapper;
 import com.baidu.shop.service.GoodsService;
+import com.baidu.shop.status.HTTPStatus;
 import com.baidu.shop.utils.BaiduBeanUtil;
 import com.baidu.shop.utils.ObjectUtil;
 import com.baidu.shop.utils.StringUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RestController;
 import tk.mybatis.mapper.entity.Example;
 
@@ -67,30 +69,29 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
 
         List<SpuEntity> list = spuMapper.selectByExample(example);
 
-        //通过品牌id查询品牌名称
         List<SpuDTO> spuDtoList = list.stream().map(spuEntity -> {
             SpuDTO spuDTO1 = BaiduBeanUtil.copyProperties(spuEntity, SpuDTO.class);
 
+            //通过品牌id查询品牌名称
             BrandEntity brandEntity = brandMapper.selectByPrimaryKey(spuEntity.getBrandId());
 
-         if( ObjectUtil.isNotNull(brandEntity))  spuDTO1.setBrandName(brandEntity.getName());
-            //设置分类
-            //通过cid1 cid2 cid3
-//            List<CategoryEntity> categoryEntityList = categoryMapper.selectByIdList(Arrays.asList(spuDTO1.getCid1(), spuDTO1.getCid2(), spuDTO1.getCid3()));
-//            String  categoryName  = categoryEntityList.stream().
-//                    map(category -> category.getName()).collect(Collectors.joining("/"));
+             if( ObjectUtil.isNotNull(brandEntity))  spuDTO1.setBrandName(brandEntity.getName());
 
-            String  categoryName  = categoryMapper.selectByIdList(
-                    Arrays.asList(spuDTO1.getCid1(), spuDTO1.getCid2(), spuDTO1.getCid3()))
-                    .stream().map(category -> category.getName())
-                    .collect(Collectors.joining("/"));
-            spuDTO1.setCategoryName(categoryName);
+            //设置分类
+            String categoryName1 = categoryMapper.getCategoryName(spuDTO1.getCid1(), spuDTO1.getCid2(), spuDTO1.getCid3());
+            //通过cid1 cid2 cid3
+//            String  categoryName  = categoryMapper.selectByIdList(
+//                    Arrays.asList(spuDTO1.getCid31(), spuDTO1.getCid2(), spuDTO1.getCid3()))
+//                    .stream().map(category -> category.getName())
+//                    .collect(Collectors.joining("/"));
+
+            spuDTO1.setCategoryName(categoryName1);
 
             return spuDTO1;
         }).collect(Collectors.toList());
 
-        PageInfo<SpuDTO> pageInfo = new PageInfo<SpuDTO>(spuDtoList);
+        PageInfo<SpuEntity> pageInfo = new PageInfo<>(list);
 
-        return this.setResultSuccess(pageInfo);
+        return this.setResult(HTTPStatus.OK,pageInfo.getTotal()+"",spuDtoList);
     }
 }
