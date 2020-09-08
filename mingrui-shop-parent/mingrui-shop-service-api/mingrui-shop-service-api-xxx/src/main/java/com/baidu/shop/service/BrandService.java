@@ -12,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @ClassName BrandService
@@ -38,4 +39,8 @@ public interface BrandService {
     @ApiOperation("删除品牌信息")
     @DeleteMapping("brand/deleteBrand")
     public Result<JsonObject> deleteBrandInfo(Integer id);
+
+    @ApiOperation("通过分类id查询品牌信息")
+    @GetMapping("brand/getBrandByCate")
+    public Result<List<BrandEntity>> getBrandByCate(Integer cid);
 }
