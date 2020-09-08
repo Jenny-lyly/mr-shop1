@@ -1,15 +1,13 @@
 package com.baidu.shop.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baidu.shop.base.BaseApiService;
 import com.baidu.shop.base.Result;
 import com.baidu.shop.dto.BrandDto;
 import com.baidu.shop.dto.SpuDTO;
-import com.baidu.shop.entity.BrandEntity;
-import com.baidu.shop.entity.CategoryEntity;
-import com.baidu.shop.entity.SpuEntity;
-import com.baidu.shop.mapper.BrandMapper;
-import com.baidu.shop.mapper.CategoryMapper;
-import com.baidu.shop.mapper.SpuMapper;
+import com.baidu.shop.dto.SpuDetailDTO;
+import com.baidu.shop.entity.*;
+import com.baidu.shop.mapper.*;
 import com.baidu.shop.service.GoodsService;
 import com.baidu.shop.status.HTTPStatus;
 import com.baidu.shop.utils.BaiduBeanUtil;
@@ -19,11 +17,13 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -47,6 +47,15 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
     @Resource
     private CategoryMapper categoryMapper;
 
+    @Resource
+    private SpuDetailMapper spuDetailMapper;
+
+    @Resource
+    private SkuMapper skuMapper;
+
+    @Resource
+    private StockMapper stockMapper;
+
     @Override
     public Result<PageInfo<SpuEntity>> getSpuInfo(SpuDTO spuDTO) {
 
@@ -68,6 +77,42 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
         PageInfo<SpuEntity> pageInfo = new PageInfo<>(list);
 
         return this.setResult(HTTPStatus.OK,pageInfo.getTotal()+"",spuDtoList);
+    }
+
+    @Override
+    @Transactional
+    public Result<JSONObject> saveGoodsInfo(SpuDTO spuDTO) {
+        Date date = new Date();
+        SpuEntity spuEntity = BaiduBeanUtil.copyProperties(spuDTO, SpuEntity.class);
+        spuEntity.setSaleable(1);
+        spuEntity.setValid(1);
+        spuEntity.setCreateTime(date);
+        spuEntity.setLastUpdateTime(date);
+        //新增spu
+        spuMapper.insertSelective(spuEntity);
+        Integer spuId = spuEntity.getId();
+
+        //新增spudetail
+        SpuDetailDTO spuDetail = spuDTO.getSpuDetail();
+        SpuDetailEntity spuDetailEntity = BaiduBeanUtil.copyProperties(spuDetail, SpuDetailEntity.class);
+        spuDetailEntity.setSpuId(spuId);
+        spuDetailMapper.insertSelective(spuDetailEntity);
+
+        spuDTO.getSkus().stream().forEach(skuDTO -> {
+            //新增sku
+            SkuEntity skuEntity = BaiduBeanUtil.copyProperties(skuDTO, SkuEntity.class);
+            skuEntity.setSpuId(spuId);
+            skuEntity.setCreateTime(date);
+            skuEntity.setLastUpdateTime(date);
+            skuMapper.insertSelective(skuEntity);
+
+            //新增stock
+            StockEntity stockEntity = new StockEntity();
+            stockEntity.setSkuId(skuEntity.getId());
+            stockEntity.setStock(skuDTO.getStock());
+            stockMapper.insertSelective(stockEntity);
+        });
+        return this.setResultSuccess();
     }
 
     public List<SpuEntity> getByExample(SpuDTO spuDTO){
@@ -101,6 +146,11 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
     }
 
     public void getCateNameByCid(SpuDTO spuDTO){
+        //通过cid1 cid2 cid3
+//            String  categoryName  = categoryMapper.selectByIdList(
+//                    Arrays.asList(spuDTO1.getCid31(), spuDTO1.getCid2(), spuDTO1.getCid3()))
+//                    .stream().map(category -> category.getName())
+//                    .collect(Collectors.joining("/"));
         //设置分类
         String categoryName1 = categoryMapper.getCategoryName(spuDTO.getCid1(), spuDTO.getCid2(), spuDTO.getCid3());
 
@@ -109,8 +159,3 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
 
 
 }
-//通过cid1 cid2 cid3
-//            String  categoryName  = categoryMapper.selectByIdList(
-//                    Arrays.asList(spuDTO1.getCid31(), spuDTO1.getCid2(), spuDTO1.getCid3()))
-//                    .stream().map(category -> category.getName())
-//                    .collect(Collectors.joining("/"));
