@@ -16,18 +16,14 @@ import com.baidu.shop.utils.ObjectUtil;
 import com.baidu.shop.utils.StringUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 import tk.mybatis.mapper.entity.Example;
-
 import javax.annotation.Resource;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 
 /**
  * @ClassName GoodsServiceImpl
@@ -129,6 +125,31 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
         return this.setResultSuccess(list);
     }
 
+    @Override
+    public Result<JSONObject> delGoodsInfo(Integer spuId) {
+        //删除spu
+        spuMapper.deleteByPrimaryKey(spuId);
+        //删除spuDetail
+        spuDetailMapper.deleteByPrimaryKey(spuId);
+        //删除sku stock
+        Example example = new Example(SkuEntity.class);
+        example.createCriteria().andEqualTo("spuId",spuId);
+        List<SkuEntity> skuEntities = skuMapper.selectByExample(example);
+        List<Long> skuIdArr = skuEntities.stream().map(sku -> sku.getId()).collect(Collectors.toList());
+        if(skuIdArr.size() > 0){
+            skuMapper.deleteByIdList(skuIdArr);
+            stockMapper.deleteByIdList(skuIdArr);
+        }
+        return this.setResultSuccess();
+    }
+
+    @Override
+    @Transactional
+    public Result<JSONObject> editGoodsInfo(SpuDTO spuDTO) {
+
+        return this.setResultSuccess();
+    }
+
     public List<SpuEntity> getByExample(SpuDTO spuDTO){
         //分页
         if(ObjectUtil.isNotNull(spuDTO.getPage()) && ObjectUtil.isNotNull(spuDTO.getRows()))
@@ -166,7 +187,8 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
 //                    .stream().map(category -> category.getName())
 //                    .collect(Collectors.joining("/"));
         //设置分类
-        String categoryName1 = categoryMapper.getCategoryName(spuDTO.getCid1(), spuDTO.getCid2(), spuDTO.getCid3());
+        String categoryName1 = categoryMapper.getCategoryName
+                (spuDTO.getCid1(), spuDTO.getCid2(), spuDTO.getCid3());
 
         spuDTO.setCategoryName(categoryName1);
     }
