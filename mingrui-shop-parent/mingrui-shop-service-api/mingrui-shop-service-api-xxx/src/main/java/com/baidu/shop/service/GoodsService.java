@@ -2,7 +2,10 @@ package com.baidu.shop.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baidu.shop.base.Result;
+import com.baidu.shop.dto.SkuDTO;
 import com.baidu.shop.dto.SpuDTO;
+import com.baidu.shop.dto.SpuDetailDTO;
+import com.baidu.shop.entity.SpuDetailEntity;
 import com.baidu.shop.entity.SpuEntity;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
@@ -30,4 +33,12 @@ public interface GoodsService {
     @ApiOperation("新增商品信息")
     @PostMapping("goods/saveInfo")
     public Result<JSONObject> saveGoodsInfo(@RequestBody  SpuDTO spuDTO);
+
+    @ApiOperation(value = "获取spu详情信息")
+    @GetMapping(value = "goods/getSpuDetailBySpuId")
+    Result<SpuDetailEntity> getSpuDetailBySpuId(Integer spuId);
+
+    @ApiOperation(value = "获取sku详情信息")
+    @GetMapping(value = "goods/selectBySkuAndStock")
+    Result<List<SkuDTO>> selectBySkuAndStock(Integer spuId);
 }

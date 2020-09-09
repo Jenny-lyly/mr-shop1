@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baidu.shop.base.BaseApiService;
 import com.baidu.shop.base.Result;
 import com.baidu.shop.dto.BrandDto;
+import com.baidu.shop.dto.SkuDTO;
 import com.baidu.shop.dto.SpuDTO;
 import com.baidu.shop.dto.SpuDetailDTO;
 import com.baidu.shop.entity.*;
@@ -115,6 +116,19 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
         return this.setResultSuccess();
     }
 
+    @Override
+    public Result<SpuDetailEntity> getSpuDetailBySpuId(Integer spuId) {
+
+        SpuDetailEntity spuDetailEntity = spuDetailMapper.selectByPrimaryKey(spuId);
+        return this.setResultSuccess(spuDetailEntity);
+    }
+
+    @Override
+    public Result<List<SkuDTO>> selectBySkuAndStock(Integer spuId) {
+        List<SkuDTO> list = skuMapper.selectBySkuAndStock(spuId);
+        return this.setResultSuccess(list);
+    }
+
     public List<SpuEntity> getByExample(SpuDTO spuDTO){
         //分页
         if(ObjectUtil.isNotNull(spuDTO.getPage()) && ObjectUtil.isNotNull(spuDTO.getRows()))
@@ -134,7 +148,7 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
         if(StringUtil.isNotEmpty(spuDTO.getSort())) example.setOrderByClause(spuDTO.getOrderByClause());
 
         List<SpuEntity> list = spuMapper.selectByExample(example);
-
+        
         return  list;
     }
     public void getBrandNameByBid(SpuEntity spuEntity,SpuDTO spuDTO){
