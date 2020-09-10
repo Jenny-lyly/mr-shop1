@@ -147,14 +147,19 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
     }
 
 
-//    @Override
-//    public Result<JSONObject> isSaleable(SpuDTO spuDTO) {
-//        SkuEntity skuEntity = skuMapper.selectByPrimaryKey(spuDTO.getId());
-//        if(skuEntity.get){
-//
-//        }
-//        return null;
-//    }
+    @Override
+    public Result<JSONObject> isSaleable(SpuDTO spuDTO) {
+        SpuEntity spuEntity = BaiduBeanUtil.copyProperties(spuDTO, SpuEntity.class);
+      // SpuEntity spuEntity = spuMapper.selectByPrimaryKey(spuDTO.getId());
+        spuEntity.setId(spuDTO.getId());
+        if(spuEntity.getSaleable() == 1){
+            spuEntity.setSaleable(0);
+        }else{
+            spuEntity.setSaleable(1);
+        }
+        spuMapper.updateByPrimaryKeySelective(spuEntity);
+        return this.setResultSuccess();
+    }
 
     public void saveSkuAndStock(List<SkuDTO> skus, Integer spuId, Date date){
         skus.stream().forEach(skuDTO -> {

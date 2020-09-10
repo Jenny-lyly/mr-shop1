@@ -47,7 +47,7 @@ public interface GoodsService {
     @PutMapping("goods/saveInfo")
     Result<JSONObject> editGoodsInfo(@RequestBody  SpuDTO spuDTO);
 
-//    @ApiOperation("修改商品信息")
-//    @PutMapping("goods/isSaleable")
-//    Result<JSONObject> isSaleable(@RequestBody  SpuDTO spuDTO);
+    @ApiOperation("修改商品状态信息是否上架")
+    @PutMapping("goods/isSaleable")
+    Result<JSONObject> isSaleable(@RequestBody SpuDTO spuDTO);
 }
