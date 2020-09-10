@@ -24,4 +24,5 @@ public class StockEntity {
     private Integer seckillTotal;
 
     private Integer stock;
+
 }
