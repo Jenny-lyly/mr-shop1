@@ -9,6 +9,7 @@ import com.baidu.shop.entity.SpuEntity;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public interface GoodsService {
 
     @ApiOperation("获取spu信息")
     @GetMapping("goods/getSpuInfo")
-    public Result<PageInfo<SpuEntity>> getSpuInfo(SpuDTO spuDTO);
+    public Result<List<SpuEntity>> getSpuInfo(@SpringQueryMap  SpuDTO spuDTO);
 
     @ApiOperation("新增商品信息")
     @PostMapping("goods/saveInfo")
@@ -33,15 +34,15 @@ public interface GoodsService {
 
     @ApiOperation(value = "获取spudetail详情信息")
     @GetMapping(value = "goods/getSpuDetailBySpuId")
-    Result<SpuDetailEntity> getSpuDetailBySpuId(Integer spuId);
+    Result<SpuDetailEntity> getSpuDetailBySpuId(@RequestParam  Integer spuId);
 
     @ApiOperation(value = "获取sku详情信息")
     @GetMapping(value = "goods/selectBySkuAndStock")
-    Result<List<SkuDTO>> selectBySkuAndStock(Integer spuId);
+    Result<List<SkuDTO>> getSkuBySpuId(@RequestParam Integer spuId);
 
     @ApiOperation("删除商品信息")
     @DeleteMapping("goods/delGoodsInfo")
-    Result<JSONObject> delGoodsInfo(Integer spuId);
+    Result<JSONObject> delGoodsInfo(@RequestParam Integer spuId);
 
     @ApiOperation("修改商品信息")
     @PutMapping("goods/saveInfo")

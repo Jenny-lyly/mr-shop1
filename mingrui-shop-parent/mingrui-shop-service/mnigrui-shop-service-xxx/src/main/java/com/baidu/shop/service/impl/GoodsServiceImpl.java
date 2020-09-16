@@ -54,7 +54,10 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
     private StockMapper stockMapper;
 
     @Override
-    public Result<PageInfo<SpuEntity>> getSpuInfo(SpuDTO spuDTO) {
+    public Result<List<SpuEntity>> getSpuInfo(SpuDTO spuDTO) {
+        //分页
+        if(ObjectUtil.isNotNull(spuDTO.getPage()) && ObjectUtil.isNotNull(spuDTO.getRows()))
+            PageHelper.startPage(spuDTO.getPage(),spuDTO.getRows());
 
         List<SpuEntity> list = this.getByExample(spuDTO);
 
@@ -108,7 +111,7 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
     }
 
     @Override
-    public Result<List<SkuDTO>> selectBySkuAndStock(Integer spuId) {
+    public Result<List<SkuDTO>> getSkuBySpuId(Integer spuId) {
         List<SkuDTO> list = skuMapper.selectBySkuAndStock(spuId);
         return this.setResultSuccess(list);
     }
@@ -148,6 +151,7 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
 
 
     @Override
+    @Transactional
     public Result<JSONObject> isSaleable(SpuDTO spuDTO) {
         SpuEntity spuEntity = BaiduBeanUtil.copyProperties(spuDTO, SpuEntity.class);
       // SpuEntity spuEntity = spuMapper.selectByPrimaryKey(spuDTO.getId());
@@ -176,8 +180,6 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
             stockEntity.setStock(skuDTO.getStock());
             stockMapper.insertSelective(stockEntity);
         });
-
-
     }
 
     public void delSkusAndStocks(Integer spuId){
@@ -190,8 +192,6 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
             skuMapper.deleteByIdList(skuIdList);
             stockMapper.deleteByIdList(skuIdList);
         }
-
-
     }
 
     public List<SpuEntity> getByExample(SpuDTO spuDTO){

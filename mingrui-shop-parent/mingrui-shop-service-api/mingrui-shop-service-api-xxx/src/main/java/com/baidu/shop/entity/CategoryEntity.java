@@ -1,13 +1,9 @@
 package com.baidu.shop.entity;
 
 import com.baidu.shop.validate.group.MrOperation;
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.annotations.ApiOperation;
 import lombok.Data;
-import lombok.NonNull;
-
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;

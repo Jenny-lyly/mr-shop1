@@ -36,7 +36,6 @@ public class CategoryServiceImpl extends BaseApiService implements CategoryServi
     @Resource
     private SpuMapper spuMapper;
 
-
     @Override
     public Result<List<CategoryEntity>> getCategoryByPid(Integer pid) {
 
@@ -66,6 +65,7 @@ public class CategoryServiceImpl extends BaseApiService implements CategoryServi
 
     @Override
     public Result<List<CategoryEntity>> getByBrand(Integer brandId) {
+
         List<CategoryEntity> byBrandId =  categoryMapper.getByBrandId(brandId);
         return this.setResultSuccess(byBrandId);
     }
@@ -74,23 +74,21 @@ public class CategoryServiceImpl extends BaseApiService implements CategoryServi
     @Transactional
     public Result<JsonObject> delCategory(Integer id) {
 
-        //通过id查询当前节点是否为父级节点
         //通过当前id查询
         CategoryEntity categoryEntity = categoryMapper.selectByPrimaryKey(id);
         //通过id查询当前节点是否存在
         if(ObjectUtil.isNull(categoryEntity)){
             return this.setResultError(HTTPStatus.OPERATION_ERROR,"当前id不存在");
         }
-
+        //通过id查询当前节点是否为父级节点
         if(categoryEntity.getIsParent() == 1){
             return this.setResultError(HTTPStatus.OPERATION_ERROR,"当前节点为父节点,不能删除");
         }
 
         Example example = new Example(SpuEntity.class);
         Example.Criteria criteria = example.createCriteria();
-//        criteria.andEqualTo("cid1",categoryEntity.getId());
         criteria.andEqualTo("cid3",categoryEntity.getId());
-//        criteria.andEqualTo("cid2",categoryEntity.getId());
+
         List<SpuEntity> spuEntityList = spuMapper.selectByExample(example);
         if(spuEntityList.size()>0){
             return this.setResultError(HTTPStatus.OPERATION_ERROR,"当前分类被商品绑定,不能删除");
@@ -130,8 +128,7 @@ public class CategoryServiceImpl extends BaseApiService implements CategoryServi
 
         List<CategoryEntity> list = categoryMapper.selectByExample(example);
 
-        //判断查询结果
-        //只有一条数据
+        //判断查询结果 只有一条数据
         if(list.size() == 1){
             //将父节点的isParent状态改为0
             CategoryEntity parentCategory = new CategoryEntity();
@@ -140,6 +137,4 @@ public class CategoryServiceImpl extends BaseApiService implements CategoryServi
             categoryMapper.updateByPrimaryKeySelective(parentCategory);
         }
     }
-
-
 }
