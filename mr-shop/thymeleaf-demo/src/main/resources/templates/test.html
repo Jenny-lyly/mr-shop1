@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>测试thymeleaf</title>
+</head>
+<body>
+<!--    &lt;!&ndash; th:指令依赖于h5&ndash;&gt;-->
+<!--    你好<span th:text="${stu.name}"></span><br>-->
+<!--    &lt;!&ndash;对象['属性值'] 如果变量是动态的，可以用此属性&ndash;&gt;-->
+<!--    您的年龄是：<span th:text="${stu['age']}"></span><br>-->
+<!--    &lt;!&ndash;对象的value中有html需要渲染的使用 utext 输出&ndash;&gt;-->
+<!--    您喜欢的颜色是<span th:utext="${stu.likeColor}"></span>-->
+<!--    <hr>-->
+<!--&lt;!&ndash;自定义变量&ndash;&gt;-->
+<!--    <div th:object="${stu}">-->
+<!--        &lt;!&ndash; "*{属性名}"&ndash;&gt;-->
+<!--        你好<span th:text="*{name}"></span><br>-->
+<!--        &lt;!&ndash;对象['属性值'] 如果变量是动态的，可以用此属性&ndash;&gt;-->
+<!--        您的年龄是：<span th:text="*{age}"></span><br>-->
+<!--        &lt;!&ndash;对象的value中有html需要渲染的使用 utext 输出&ndash;&gt;-->
+<!--        您喜欢的颜色是<span th:utext="*{likeColor}"></span>-->
+<!--    </div>-->
+<!--    <hr>-->
+<!--    &lt;!&ndash; 可以调用字符串截取，分割等函数&ndash;&gt;-->
+<!--    <span th:text="${stu.name.substring(2,6)}"></span><br>-->
+<!--    <span th:text="${stu.name.split('')[1]}"></span><br>-->
+<!--    <hr>-->
+<!--    数字:-->
+<!--    <span th:text="1024*2"></span><br>-->
+<!--    布尔:-->
+<!--    <span th:if="${stu.age} >= 18">成年</span><br>-->
+<!--    拼接:<br>-->
+<!--    <span th:text="'你好'+${stu.name}+',真的666'"></span><br>-->
+<!--    <span th:text="|你好${stu.name},真的666|"></span><br>-->
+<!--    <hr>-->
+<!--    <span th:text="${stu.age}+2"></span><br>-->
+<!--    <span th:text="${stu.age} >= 18 ?'成年':'不成年'"></span><br>-->
+<!--    <hr>-->
+<ul>
+    <li>姓名--年龄--颜色</li>
+    <li th:each="stu  : ${stuList}">
+        <span th:text="${stu.name}"></span>--
+        <span th:text="${stu.age}"></span>--
+        <span th:text="${stu.likeColor}"></span>
+    </li>
+</ul>
+    <ul>
+        <li>下标--姓名--年龄--颜色--类型</li>
+        <li th:each="stu ,stat : ${stuList}">
+            <span th:text="${stat.index}"></span>--
+            <span th:text="${stu.name}"></span>--
+            <span th:if="${stu.age} >= 18">成年</span>
+            <span th:unless="${stu.age >= 18}">未成年</span>--
+<!--            <span th:text="${stu.age}"></span>&#45;&#45;-->
+            <span th:text="${stu.likeColor}"></span>--
+            <!--            switch 选择-->
+            <span th:switch="${stu.likeColor}">
+                <span th:case="'red'">1号员工</span>
+                <span th:case="'blue'">2号员工</span>
+                <span th:case="'yellow'">3号员工</span>
+                <span th:case="'pink'">4号员工</span>
+                <span th:case="*">5号员工</span>
+            </span>
+        </li>
+    </ul>
+
+    <script th:inline="javascript">
+        //预处理js值
+        const stuList = /*[[${stuList}]]*/;
+        const stu = /*[[${stuList[0]}]]*/;
+        const age = /*[[${stuList[0].age}]]*/;
+
+        console.log("集合"+stuList);
+        console.log("对象"+stu);
+        console.log("属性"+age);
+
+        stuList.forEach(stu =>{
+            console.log(stu.name+","+stu.likeColor)
+        })
+    </script>
+</body>
+</html>

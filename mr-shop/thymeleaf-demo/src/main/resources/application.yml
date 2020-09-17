@@ -1,0 +1,7 @@
+server: #端口
+  port: 8083
+spring: #清除页面缓存
+  thymeleaf:
+    prefix: file:src/main/resources/templates/
+    cache: false
+    suffix: .html
