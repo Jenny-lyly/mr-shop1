@@ -10,6 +10,7 @@ import com.google.gson.JsonObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.models.auth.In;
+import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,7 +44,7 @@ public interface SpecificationService {
 
     @GetMapping("specparam/getSpecParamInfo")
     @ApiOperation(value = "通过条件查询规格参数")
-    public Result<List<SpecParamEntity>> getSpecParamInfo(SpecParamDto specParamDto);
+    public Result<List<SpecParamEntity>> getSpecParamInfo(@SpringQueryMap  SpecParamDto specParamDto);
 
     @ApiOperation("新增规格参数")
     @PostMapping("spexparam/save")

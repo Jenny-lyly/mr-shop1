@@ -26,7 +26,7 @@ public interface GoodsService {
 
     @ApiOperation("获取spu信息")
     @GetMapping("goods/getSpuInfo")
-    public Result<List<SpuEntity>> getSpuInfo(@SpringQueryMap  SpuDTO spuDTO);
+    public Result<List<SpuDTO>> getSpuInfo(@SpringQueryMap  SpuDTO spuDTO);
 
     @ApiOperation("新增商品信息")
     @PostMapping("goods/saveInfo")

@@ -1,5 +1,6 @@
 package com.baidu.shop.document;
 
+import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -17,6 +18,7 @@ import java.util.Map;
  * @Version V1.0
  **/
 @Document(indexName = "goods",shards = 1,replicas = 0)//shards:分片数量,replicas:备份
+@Data
 public class GoodsDoc {
 
     @Id

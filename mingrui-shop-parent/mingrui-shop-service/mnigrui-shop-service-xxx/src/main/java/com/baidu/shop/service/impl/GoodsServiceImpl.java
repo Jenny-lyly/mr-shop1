@@ -54,7 +54,7 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
     private StockMapper stockMapper;
 
     @Override
-    public Result<List<SpuEntity>> getSpuInfo(SpuDTO spuDTO) {
+    public Result<List<SpuDTO>> getSpuInfo(SpuDTO spuDTO) {
         //分页
         if(ObjectUtil.isNotNull(spuDTO.getPage()) && ObjectUtil.isNotNull(spuDTO.getRows()))
             PageHelper.startPage(spuDTO.getPage(),spuDTO.getRows());
