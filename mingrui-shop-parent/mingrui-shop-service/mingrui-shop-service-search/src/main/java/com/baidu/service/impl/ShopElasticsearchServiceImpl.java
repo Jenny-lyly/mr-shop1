@@ -95,6 +95,33 @@ public class ShopElasticsearchServiceImpl extends BaseApiService implements Shop
 
         if (StringUtil.isEmpty(search))  throw new RuntimeException("搜索条件不能为空");
 
+        //查询
+        SearchHits<GoodsDoc> searchHits = elasticsearchRestTemplate.search(this.getSearchQueryBuilder(search,page).build(), GoodsDoc.class);
+        //高亮
+        List<SearchHit<GoodsDoc>> highLightHit = ESHighLightUtil.getHighLightHit(searchHits.getSearchHits());
+        List<GoodsDoc> goodsDocs = highLightHit.stream().map(hit -> hit.getContent()).collect(Collectors.toList());
+        //分页
+        long total = searchHits.getTotalHits();
+        long totalPage = Double.valueOf(Math.ceil(Long.valueOf(total).doubleValue() / 10)).longValue();
+
+        //聚合
+        Aggregations aggregations = searchHits.getAggregations();
+        List<BrandEntity> brandList = this.getBrandList(aggregations);
+        List<CategoryEntity> categoryList = this.getCategoryList(aggregations);
+
+        GoodsResponse goodsResponse = new GoodsResponse(total, totalPage,brandList, categoryList, goodsDocs);
+
+        return goodsResponse;
+    }
+
+    /**
+     * 构建查询
+     * @param search
+     * @param page
+     * @return
+     */
+    private NativeSearchQueryBuilder getSearchQueryBuilder(String search,Integer page){
+
         NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
         queryBuilder.withQuery(QueryBuilders.multiMatchQuery(search,"title","brandName","categoryName"));
         //分页
@@ -103,36 +130,40 @@ public class ShopElasticsearchServiceImpl extends BaseApiService implements Shop
         //高亮
         queryBuilder.withHighlightBuilder(ESHighLightUtil.getHighlightBuilder("title"));
 
-        
+
         //聚合品牌,分类
         queryBuilder.addAggregation(AggregationBuilders.terms("cid_agg").field("cid3"));
         queryBuilder.addAggregation(AggregationBuilders.terms("brand_agg").field("brandId"));
+        return queryBuilder;
+    };
 
-        SearchHits<GoodsDoc> searchHits = elasticsearchRestTemplate.search(queryBuilder.build(), GoodsDoc.class);
+    /**
+     * 获得品牌
+     * @param aggregations
+     * @return
+     */
+    private List<BrandEntity> getBrandList(Aggregations aggregations){
 
-        List<SearchHit<GoodsDoc>> highLightHit = ESHighLightUtil.getHighLightHit(searchHits.getSearchHits());
-        List<GoodsDoc> goodsDocs = highLightHit.stream().map(hit -> hit.getContent()).collect(Collectors.toList());
-
-        long total = searchHits.getTotalHits();
-        long totalPage = Double.valueOf(Math.ceil(Long.valueOf(total).doubleValue() / 10)).longValue();
-
-        HashMap<String, Long> messageMap = new HashMap<>();
-        messageMap.put("total",total);
-        messageMap.put("totalPage",totalPage);
-
-        Aggregations aggregations = searchHits.getAggregations();
-        Terms cid_agg = aggregations.get("cid_agg");
         Terms brand_agg = aggregations.get("brand_agg");
 
-        List<? extends Terms.Bucket> brandBuckets = brand_agg.getBuckets();
-        List<String> brandIdList = brandBuckets.stream().map(brandBucket -> {
+        List<String> brandIdList = brand_agg.getBuckets().stream().map(brandBucket -> {
             Number keyAsNumber = brandBucket.getKeyAsNumber();
             return keyAsNumber.intValue() + "";
         }).collect(Collectors.toList());
 
         String brandIdStr = String.join(",", brandIdList);
         Result<List<BrandEntity>> brandResult = brandFeign.getBrandByIdList(brandIdStr);
+        return brandResult.getData();
+    }
 
+    /**
+     * 分类
+     * @param aggregations
+     * @return
+     */
+    private List<CategoryEntity> getCategoryList(Aggregations aggregations){
+
+        Terms cid_agg = aggregations.get("cid_agg");
         List<? extends Terms.Bucket> cidBuckets = cid_agg.getBuckets();
         //返回string类型的id集合去查询数据
         List<String> cidList = cidBuckets.stream().map(cidBucket -> {
@@ -145,11 +176,8 @@ public class ShopElasticsearchServiceImpl extends BaseApiService implements Shop
         // String.join(",", cidList); 通过,分隔list集合 --> 返回,拼接的string字符串
         String cidStr = String.join(",", cidList);
         Result<List<CategoryEntity>> categoryResult = categoryFeign.getCategoryByIdList(cidStr);
-
-        GoodsResponse goodsResponse = new GoodsResponse(total, totalPage, brandResult.getData(), categoryResult.getData(), goodsDocs);
-
-        return goodsResponse;
-    }
+         return categoryResult.getData();
+    };
 
     private List<GoodsDoc> getEsGoodsInfo() {
 
