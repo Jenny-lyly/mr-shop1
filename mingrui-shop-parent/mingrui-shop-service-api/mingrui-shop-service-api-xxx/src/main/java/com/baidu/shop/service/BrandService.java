@@ -3,6 +3,7 @@ package com.baidu.shop.service;
 import com.baidu.shop.base.Result;
 import com.baidu.shop.dto.BrandDto;
 import com.baidu.shop.entity.BrandEntity;
+import com.baidu.shop.entity.CategoryEntity;
 import com.baidu.shop.validate.group.MrOperation;
 import com.github.pagehelper.PageInfo;
 import com.google.gson.JsonObject;
@@ -43,4 +44,8 @@ public interface BrandService {
     @ApiOperation("通过分类id查询品牌信息")
     @GetMapping("brand/getBrandByCate")
     public Result<List<BrandEntity>> getBrandByCate(Integer cid);
+
+    @ApiOperation("通过品牌id查询品牌信息")
+    @GetMapping("brand/getBrandByIdList")
+    Result<List<BrandEntity>> getBrandByIdList(@RequestParam  String brandIdStr);
 }

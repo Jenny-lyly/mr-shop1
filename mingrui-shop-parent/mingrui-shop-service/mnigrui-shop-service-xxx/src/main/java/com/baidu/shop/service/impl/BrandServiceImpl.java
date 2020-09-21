@@ -5,6 +5,7 @@ import com.baidu.shop.base.Result;
 import com.baidu.shop.dto.BrandDto;
 import com.baidu.shop.entity.CategoryBrandEntity;
 import com.baidu.shop.entity.BrandEntity;
+import com.baidu.shop.entity.CategoryEntity;
 import com.baidu.shop.entity.SpuEntity;
 import com.baidu.shop.mapper.BrandCategoryMapper;
 import com.baidu.shop.mapper.BrandMapper;
@@ -18,6 +19,7 @@ import com.baidu.shop.utils.StringUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.gson.JsonObject;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
@@ -127,6 +129,16 @@ public class BrandServiceImpl extends BaseApiService implements BrandService {
         return this.setResultSuccess(list);
     }
 
+    @Override
+    public Result<List<BrandEntity>> getBrandByIdList(String brandIdStr) {
+        List<Integer> brandIdList = Arrays.asList(brandIdStr.split(",")).stream().map(brandId -> {
+            return Integer.parseInt(brandId);
+        }).collect(Collectors.toList());
+
+        List<BrandEntity> list = brandMapper.selectByIdList(brandIdList);
+        return this.setResultSuccess(list);
+    }
+
     private void deleteCategoryAndBrand(Integer id){
 
         //通过brandId删除中间表中的数据
@@ -168,5 +180,7 @@ public class BrandServiceImpl extends BaseApiService implements BrandService {
             categoryBrandMapper.insertSelective(entity);
         }
     }
+
+
 
 }
