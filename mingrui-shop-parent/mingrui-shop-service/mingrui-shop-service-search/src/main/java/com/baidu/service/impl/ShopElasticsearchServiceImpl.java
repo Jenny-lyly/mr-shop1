@@ -24,6 +24,8 @@ import com.baidu.shop.utils.StringUtil;
 import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
@@ -100,27 +102,25 @@ public class ShopElasticsearchServiceImpl extends BaseApiService implements Shop
      * @return
      */
     @Override
-    public GoodsResponse search(String search,Integer page) {
+    public GoodsResponse search(String search,Integer page,String filter) {
 
         if (StringUtil.isEmpty(search))  throw new RuntimeException("搜索条件不能为空");
-
         //查询
-        SearchHits<GoodsDoc> searchHits = elasticsearchRestTemplate.search(this.getSearchQueryBuilder(search,page).build(), GoodsDoc.class);
+        SearchHits<GoodsDoc> searchHits = elasticsearchRestTemplate.search(this.getSearchQueryBuilder(search,page,filter).build(), GoodsDoc.class);
         //设置高亮字段
         List<SearchHit<GoodsDoc>> highLightHit = ESHighLightUtil.getHighLightHit(searchHits.getSearchHits());
         List<GoodsDoc> goodsDocs = highLightHit.stream().map(hit -> hit.getContent()).collect(Collectors.toList());
         //分页
         long total = searchHits.getTotalHits();
         long totalPage = Double.valueOf(Math.ceil(Long.valueOf(total).doubleValue() / 10)).longValue();
-
         //聚合
         Aggregations aggregations = searchHits.getAggregations();
+
         List<BrandEntity> brandList = this.getBrandList(aggregations);
         Map<Integer, List<CategoryEntity>> map = this.getCategoryList(aggregations);
 
         Integer hotCid = 0;
         List<CategoryEntity> categoryList = null;
-
         for(Map.Entry<Integer, List<CategoryEntity>> entry :map.entrySet()){
             hotCid = entry.getKey();
             categoryList = entry.getValue();
@@ -128,12 +128,15 @@ public class ShopElasticsearchServiceImpl extends BaseApiService implements Shop
 
         Map<String, List<String>> specParamMap = this.getSpecParam(hotCid, search);
 
-
-        GoodsResponse goodsResponse = new GoodsResponse(total, totalPage,brandList, categoryList, goodsDocs,specParamMap);
-
-        return goodsResponse;
+        return new GoodsResponse(total, totalPage,brandList, categoryList, goodsDocs,specParamMap);
     }
 
+    /**
+     * 获得规格参数
+     * @param hotCid
+     * @param search
+     * @return
+     */
     private Map<String, List<String>> getSpecParam(Integer hotCid,String search){
 
         SpecParamDto specParamDto = new SpecParamDto();
@@ -146,7 +149,6 @@ public class ShopElasticsearchServiceImpl extends BaseApiService implements Shop
             List<SpecParamEntity> specParamList  = specParamResult.getData();
 
             NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-
             queryBuilder.withQuery(QueryBuilders.multiMatchQuery(search,"title","brandName","categoryName"));
             //分页必须得查询一条数据
             queryBuilder.withPageable(PageRequest.of(0,1));
@@ -158,19 +160,26 @@ public class ShopElasticsearchServiceImpl extends BaseApiService implements Shop
             SearchHits<GoodsDoc> searchHits = elasticsearchRestTemplate.search(queryBuilder.build(), GoodsDoc.class);
             Aggregations aggregations = searchHits.getAggregations();
 
-            //key:paramName value-->aggr
-            Map<String, List<String>> map = new HashMap<>();
-            specParamList.stream().forEach(specParam ->{
-
-                Terms terms = aggregations.get(specParam.getName());
-                List<? extends Terms.Bucket> buckets = terms.getBuckets();
-                List<String> valueList = buckets.stream().map(bucket -> bucket.getKeyAsString()).collect(Collectors.toList());
-
-                map.put(specParam.getName(),valueList);
-            });
-            return map;
+            return this.getSpecParamMap(specParamList,aggregations);
         }
         return null;
+    }
+
+    private Map<String, List<String>> getSpecParamMap(List<SpecParamEntity> specParamList,Aggregations aggregations){
+
+        //key:paramName value-->aggr
+        Map<String, List<String>> map = new HashMap<>();
+        specParamList.stream().forEach(specParam ->{
+
+            Terms terms = aggregations.get(specParam.getName());
+            List<? extends Terms.Bucket> buckets = terms.getBuckets();
+            //key中存储了我们需要的规格参数的值,类型为string
+            List<String> valueList = buckets.stream().map(bucket -> bucket.getKeyAsString()).collect(Collectors.toList());
+
+            map.put(specParam.getName(),valueList);
+        });
+
+        return map;
     }
 
     /**
@@ -179,10 +188,28 @@ public class ShopElasticsearchServiceImpl extends BaseApiService implements Shop
      * @param page
      * @return
      */
-    private NativeSearchQueryBuilder getSearchQueryBuilder(String search,Integer page){
+    private NativeSearchQueryBuilder getSearchQueryBuilder(String search,Integer page,String filter){
 
         NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
         queryBuilder.withQuery(QueryBuilders.multiMatchQuery(search,"title","brandName","categoryName"));
+
+        if(StringUtil.isNotEmpty(filter) && filter.length() > 2){
+
+            BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+            Map<String, String> filterMap = JSONUtil.toMapValueString(filter);
+
+            filterMap.forEach((key,value) ->{
+
+                MatchQueryBuilder matchQueryBuilder = null;
+                if (key.equals("cid3") || key.equals("brandId")) {
+                     matchQueryBuilder = QueryBuilders.matchQuery(key, value);
+                }else{
+                    matchQueryBuilder = QueryBuilders.matchQuery("specs."+key+".keyword",value);
+                }
+                boolQueryBuilder.must(matchQueryBuilder);
+            });
+            queryBuilder.withFilter(boolQueryBuilder);
+        }
         //分页
         queryBuilder.withPageable(PageRequest.of(page-1,10));
         //高亮
