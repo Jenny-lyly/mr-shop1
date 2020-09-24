@@ -1,6 +1,7 @@
 package com.baidu.shop.dto;
 
 import com.baidu.shop.base.BaseDto;
+import com.baidu.shop.entity.SpecParamEntity;
 import com.baidu.shop.validate.group.MrOperation;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -8,6 +9,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * @ClassName SpecGroupDto
@@ -31,4 +33,7 @@ public class SpecGroupDto extends BaseDto {
     @ApiModelProperty(value = "规格组名称")
     @NotEmpty(message = "规格组名称",groups = {MrOperation.Add.class})
     private String name;
+
+    @ApiModelProperty(value = "特有规格参数")
+    private List<SpecParamEntity> specParams;
 }

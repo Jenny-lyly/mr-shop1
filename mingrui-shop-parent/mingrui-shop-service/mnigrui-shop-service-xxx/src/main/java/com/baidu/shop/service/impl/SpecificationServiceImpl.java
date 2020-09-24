@@ -36,7 +36,7 @@ public class SpecificationServiceImpl extends BaseApiService implements Specific
     @Resource
     private SpecParamMapper specParamMapper;
     @Override
-    public Result<List<SpecGroupEntity>> getSpecInfo(SpecGroupDto specGroupDto) {
+    public Result<List<SpecGroupEntity>> getSpecGroupInfo(SpecGroupDto specGroupDto) {
 
         Example example = new Example(SpecGroupEntity.class);
         if(ObjectUtil.isNotNull(specGroupDto.getCid())) example.createCriteria().andEqualTo("cid",specGroupDto.getCid());
@@ -88,6 +88,10 @@ public class SpecificationServiceImpl extends BaseApiService implements Specific
 
         if (ObjectUtil.isNotNull(specParamDto.getSearching())) {
             criteria.andEqualTo("searching",specParamDto.getSearching());
+        }
+
+        if (ObjectUtil.isNotNull(specParamDto.getGeneric())) {
+            criteria.andEqualTo("generic",specParamDto.getGeneric());
         }
         List<SpecParamEntity> list = specParamMapper.selectByExample(example);
         return this.setResultSuccess(list);

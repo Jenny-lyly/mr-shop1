@@ -382,7 +382,6 @@ public class ShopElasticsearchServiceImpl extends BaseApiService implements Shop
                     }
                 });
             }
-
         }
         return specMap;
     }
