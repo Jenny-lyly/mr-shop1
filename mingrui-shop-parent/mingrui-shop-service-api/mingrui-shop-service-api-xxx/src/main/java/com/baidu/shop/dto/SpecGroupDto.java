@@ -34,6 +34,6 @@ public class SpecGroupDto extends BaseDto {
     @NotEmpty(message = "规格组名称",groups = {MrOperation.Add.class})
     private String name;
 
-    @ApiModelProperty(value = "特有规格参数")
+    @ApiModelProperty(hidden = true)
     private List<SpecParamEntity> specParams;
 }
