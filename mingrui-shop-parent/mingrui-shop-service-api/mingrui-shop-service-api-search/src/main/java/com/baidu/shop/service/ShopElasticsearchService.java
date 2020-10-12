@@ -34,5 +34,13 @@ public interface ShopElasticsearchService {
 
     @ApiOperation(value = "搜索")
     @GetMapping(value = "es/search")
-    GoodsResponse search(String search, Integer page,String filter);//
+    GoodsResponse search(String search, Integer page,String filter);
+
+    @ApiOperation(("新增数据到es"))
+    @PostMapping(value = "es/saveData")
+    Result<JSONObject> saveData(Integer spuId);
+
+    @ApiOperation(("通过id删除es数据"))
+    @PostMapping(value = "es/delData")
+    Result<JSONObject> delData(Integer spuId);
 }
