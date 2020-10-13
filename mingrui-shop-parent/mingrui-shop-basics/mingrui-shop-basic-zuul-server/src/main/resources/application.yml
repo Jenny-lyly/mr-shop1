@@ -12,6 +12,7 @@ zuul:
   routes:
     xxx-service: /manage/**
     search-server: /search/**
+    user-server: /user-center/**
   # 声明路由
   #routes:
     # 路由名称
