@@ -84,8 +84,15 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
     }
 
     @Override
-    @Transactional
     public Result<JSONObject> saveGoodsInfo(SpuDTO spuDTO) {
+
+        Integer spuId = this.saveGoodsTransactional(spuDTO);
+        mrRabbitMQ.send(spuId + "", MqMessageConstant.SPU_ROUT_KEY_SAVE);
+        return this.setResultSuccess();
+    }
+
+    @Transactional
+    public Integer saveGoodsTransactional(SpuDTO spuDTO){
         Date date = new Date();
         SpuEntity spuEntity = BaiduBeanUtil.copyProperties(spuDTO, SpuEntity.class);
         spuEntity.setSaleable(1);
@@ -103,12 +110,7 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
         spuDetailMapper.insertSelective(spuDetailEntity);
 
         this.saveSkuAndStock(spuDTO.getSkus(),spuId,date);
-
-        //@feign search template
-        //发送消息
-        mrRabbitMQ.send(spuEntity.getId() + "", MqMessageConstant.SPU_ROUT_KEY_SAVE);
-
-        return this.setResultSuccess();
+        return spuId;
     }
 
     @Override
@@ -125,21 +127,34 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
     }
 
     @Override
-    @Transactional
     public Result<JSONObject> delGoodsInfo(Integer spuId) {
+
+        this.delGoodsTransaction(spuId);
+        mrRabbitMQ.send(spuId + "", MqMessageConstant.SPU_ROUT_KEY_DELETE);
+        return this.setResultSuccess();
+    }
+
+
+    @Transactional
+    public void delGoodsTransaction(Integer spuId) {
         //删除spu
         spuMapper.deleteByPrimaryKey(spuId);
         //删除spuDetail
         spuDetailMapper.deleteByPrimaryKey(spuId);
         //删除sku stock
         this.delSkusAndStocks(spuId);
-
-        return this.setResultSuccess();
     }
 
     @Override
-    @Transactional
     public Result<JSONObject> editGoodsInfo(SpuDTO spuDTO) {
+
+        this.editGoodsTransaction(spuDTO);
+        mrRabbitMQ.send(spuDTO.getId() + "", MqMessageConstant.SPU_ROUT_KEY_UPDATE);
+        return this.setResultSuccess();
+    }
+
+    @Transactional
+    public void editGoodsTransaction(SpuDTO spuDTO) {
         Date date = new Date();
         SpuEntity spuEntity = BaiduBeanUtil.copyProperties(spuDTO, SpuEntity.class);
         spuEntity.setLastUpdateTime(date);
@@ -153,8 +168,6 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
 
         //新增  sku stock
         this.saveSkuAndStock(spuDTO.getSkus(),spuDTO.getId(),date);
-
-        return this.setResultSuccess();
     }
 
 

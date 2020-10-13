@@ -54,6 +54,18 @@ public class TemplateServiceImpl extends BaseApiService implements TemplateServi
     private String staticHTMLPath;
 
     @Override
+    public Result<JSONObject> delHTMLBySpuId(Integer spuId) {
+
+        File file = new File(staticHTMLPath + File.separator + spuId + ".html");
+
+        if(!file.delete()){
+            return this.setResultError("文件删除失败");
+        }
+
+        return this.setResultSuccess();
+    }
+
+    @Override
     public Result<JSONObject> createStaticHTMLTemplate(Integer spuId) {
 
         Context context = new Context();
@@ -66,12 +78,12 @@ public class TemplateServiceImpl extends BaseApiService implements TemplateServi
         PrintWriter writer = null;
         try {
             writer = new PrintWriter(file, "UTF-8");
+            templateEngine.process("item",context,writer);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }finally {
-            templateEngine.process("item",context,writer);
             writer.close();
         }
         return this.setResultSuccess();
