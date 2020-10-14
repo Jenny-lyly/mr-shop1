@@ -3,6 +3,7 @@ package com.baidu.shop.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.baidu.shop.base.BaseApiService;
 import com.baidu.shop.base.Result;
+import com.baidu.shop.constant.MrPhoneConstant;
 import com.baidu.shop.constant.UserConstant;
 import com.baidu.shop.dto.UserDTO;
 import com.baidu.shop.entity.UserEntity;
@@ -11,7 +12,6 @@ import com.baidu.shop.redis.repository.RedisRepository;
 import com.baidu.shop.service.UserService;
 import com.baidu.shop.utils.BCryptUtil;
 import com.baidu.shop.utils.BaiduBeanUtil;
-import com.baidu.shop.utils.LuosimaoDuanxinUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -71,14 +71,20 @@ public class UserServiceImpl extends BaseApiService implements UserService {
 //        LuosimaoDuanxinUtil.SendCode(userDTO.getPhone(),code);
         log.debug("向手机号码:{} 发送验证码:{}",userDTO.getPhone(),code);
 
-        redisRepository.set("valid-code-"+userDTO.getPhone(),code);
-        redisRepository.expire("valide-code-"+userDTO.getPhone(),60);
+        redisRepository.set(MrPhoneConstant.USER_PHONE_CODE_VALIDE +userDTO.getPhone(),code);
+        redisRepository.expire(MrPhoneConstant.USER_PHONE_CODE_VALIDE+userDTO.getPhone(),120);
 
         return this.setResultSuccess();
     }
 
     @Override
     public Result<JSONObject> checkValidCode(String phone, String validcode) {
-        return null;
+
+        String redisValidCode = redisRepository.get(MrPhoneConstant.USER_PHONE_CODE_VALIDE + phone);
+        if(!validcode.equals(redisValidCode)){
+            return this.setResultError("验证码u输入错误");
+        }
+
+        return this.setResultSuccess();
     }
 }
