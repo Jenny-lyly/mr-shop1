@@ -22,8 +22,7 @@ public class LuosimaoDuanxinUtil {
 
     //短信平台的APIkey
     private static final String DUANXIN_API_KEY = "key-12040ab83bb98f841f339c24098e36c7";//需要使用自己的APIkey
-    private static final String SPEAK_API_KEY = "key-44dd21af5050aea3bdd2258693b65ff2";//需要使用自己的APIkey
-//    private static final String SPEAK_API_KEY = "key-84ab645ae5028974078f68f420f45d10";//需要使用自己的APIkey
+    private static final String SPEAK_API_KEY = "key-84ab645ae5028974078f68f420f45d10";//需要使用自己的APIkey
     private static final String SEND_DUANXIN_URL = "http://sms-api.luosimao.com/v1/send.json";//发送短信的接口
     private static final String SEND_SPEAK_URL = "http://voice-api.luosimao.com/v1/verify.json";//发送语音的接口
     private static final String STATUS_URL = "http://sms-api.luosimao.com/v1/status.json";//查看余额的接口

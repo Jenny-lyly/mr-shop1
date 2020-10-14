@@ -7,11 +7,13 @@ import com.baidu.shop.constant.UserConstant;
 import com.baidu.shop.dto.UserDTO;
 import com.baidu.shop.entity.UserEntity;
 import com.baidu.shop.mapper.UserMapper;
+import com.baidu.shop.redis.repository.RedisRepository;
 import com.baidu.shop.service.UserService;
 import com.baidu.shop.utils.BCryptUtil;
 import com.baidu.shop.utils.BaiduBeanUtil;
 import com.baidu.shop.utils.LuosimaoDuanxinUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 import tk.mybatis.mapper.entity.Example;
 
@@ -32,6 +34,8 @@ public class UserServiceImpl extends BaseApiService implements UserService {
 
     @Resource
     private UserMapper userMapper;
+    @Autowired
+    private RedisRepository  redisRepository;
 
     @Override
     public Result<List<UserEntity>> checkUsernameOrPhonenumber(String value, Integer type) {
@@ -66,6 +70,15 @@ public class UserServiceImpl extends BaseApiService implements UserService {
         //发送短信验证码
 //        LuosimaoDuanxinUtil.SendCode(userDTO.getPhone(),code);
         log.debug("向手机号码:{} 发送验证码:{}",userDTO.getPhone(),code);
+
+        redisRepository.set("valid-code-"+userDTO.getPhone(),code);
+        redisRepository.expire("valide-code-"+userDTO.getPhone(),60);
+
         return this.setResultSuccess();
+    }
+
+    @Override
+    public Result<JSONObject> checkValidCode(String phone, String validcode) {
+        return null;
     }
 }
