@@ -13,6 +13,7 @@ zuul:
     xxx-service: /manage/**
     search-server: /search/**
     user-server: /user-center/**
+    oauth-server: /oauth/**
   # 声明路由
   #routes:
     # 路由名称
@@ -30,6 +31,8 @@ zuul:
   # 忽略上传服务
   ignored-services:
     -upload-server
+  add-host-header: true
+  sensitive-headers:
 #配置负载
 ribbon:
   ConnectTimeout: 1000 # 连接超时时间(ms)
