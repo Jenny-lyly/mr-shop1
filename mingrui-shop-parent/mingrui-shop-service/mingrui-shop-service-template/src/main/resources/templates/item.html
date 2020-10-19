@@ -642,27 +642,31 @@
         },
         methods : {
             addCar(){
-                //从localstorage中获取购物车数据 || 如果没有获取到数据直接返回空的数组
-                let carList =mrshop.store.get("carList") || []
-                //判断当前将要加入到购物车的数据是否在购物车中
-                let car = carList.find(car =>car.skuId == this.sku.id)
-                if(car){
-                    //原来的数量加上当前设置的num数量
-                    car.num += this.num;
-                }else{
-                    car = {
-                        skuId:this.sku.id,
-                        title:this.sku.title,
-                        image:this.images[0],
-                        price:this.sku.price,
-                        num:this.num,
-                        ownSpec:JSON.stringify(this.ownSpec)
-                    };
-                    carList.push(car);
-                }
+                mrshop.checkUserLogin().then(resp =>{
 
-                //重置购物车数据
-                mrshop.store.set("carList",carList);
+                }).catch( () =>{
+                    //从localstorage中获取购物车数据 || 如果没有获取到数据直接返回空的数组
+                    let carList =mrshop.store.get("carList") || []
+                    //判断当前将要加入到购物车的数据是否在购物车中
+                    let car = carList.find(car =>car.skuId == this.sku.id)
+                    if(car){
+                        //原来的数量加上当前设置的num数量
+                        car.num += this.num;
+                    }else{
+                        car = {
+                            skuId:this.sku.id,
+                            title:this.sku.title,
+                            image:this.images[0],
+                            price:this.sku.price,
+                            num:this.num,
+                            ownSpec:JSON.stringify(this.ownSpec)
+                        };
+                        carList.push(car);
+                    }
+
+                    //重置购物车数据
+                    mrshop.store.set("carList",carList);
+                });
                 //跳转到新增购物车成功页面,加上HTTP://为了防止url拼接
                 window.location.href = '../success-cart.html';
             },
