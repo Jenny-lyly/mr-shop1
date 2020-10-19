@@ -52,10 +52,16 @@ public class UserOauthController extends BaseApiService {
     }
 
     @GetMapping("oauth/verify")
-    public Result<UserInfo> verify(@CookieValue(value = "MRSHOP_TOKEN") String token){
+    public Result<UserInfo> verify(@CookieValue(value = "MRSHOP_TOKEN") String token , HttpServletRequest request, HttpServletResponse response){
 
         try {
             UserInfo userInfo = JwtUtils.getInfoFromToken(token, jwtConfig.getPublicKey());
+    //可以解析token的证明用户是正确登录状态,重新生成 token
+            String newToken = JwtUtils.generateToken(new UserInfo(userInfo.getId(),userInfo.getUsername())
+                    ,jwtConfig.getPrivateKey(),jwtConfig.getExpire());
+            //将newToken写道cookie中
+            CookieUtils.setCookie(request,response,jwtConfig.getCookieName(),token,jwtConfig.getCookieMaxAge(),true);
+
             return this.setResultSuccess(userInfo);
         } catch (Exception e) {
             e.printStackTrace();

@@ -2,6 +2,7 @@ package com.baidu.shop.bussiness.impl;
 
 import com.baidu.shop.bussiness.OauthService;
 import com.baidu.shop.config.JwtConfig;
+import com.baidu.shop.constant.PhoneConstant;
 import com.baidu.shop.dto.UserInfo;
 import com.baidu.shop.entity.UserEntity;
 import com.baidu.shop.mapper.UserOauthMapper;
@@ -12,6 +13,8 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @ClassName UserServiceImpl
@@ -30,9 +33,19 @@ public class OauthServiceImpl implements OauthService {
 
         String tocken = null;
 
+        Pattern p = Pattern.compile(PhoneConstant.PHONE_NUMBER_REG);
+        Matcher m = p.matcher(userEntity.getUsername());
+        boolean isMatch = m.matches();
+
         Example example = new Example(UserEntity.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("username",userEntity.getUsername());
+
+        if(userEntity.getUsername().length()== 11 && isMatch){
+            criteria.andEqualTo("phone",userEntity.getUsername());
+        }else{
+            criteria.andEqualTo("username",userEntity.getUsername());
+        }
+
         List<UserEntity> list = userOauthMapper.selectByExample(example);
         if(list.size() == 1){
             UserEntity entity = list.get(0);
@@ -45,8 +58,6 @@ public class OauthServiceImpl implements OauthService {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            }else{
-
             }
         }
         return tocken;
