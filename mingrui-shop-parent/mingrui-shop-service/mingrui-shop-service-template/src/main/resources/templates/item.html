@@ -643,10 +643,18 @@
         methods : {
             addCar(){
                 mrshop.checkUserLogin().then(resp =>{
+                    mrshop.http.post('car/car/addCar',{
+                        skuId:this.sku.id,
+                        num:this.num,
+                    }).then(resp =>{
+                        if(resp.data.code == 200){
+                            window.location.href = '../success-cart.html';
+                        }
+                    }).catch(error =>console.log(error))
 
                 }).catch( () =>{
                     //从localstorage中获取购物车数据 || 如果没有获取到数据直接返回空的数组
-                    let carList =mrshop.store.get("carList") || []
+                    let carList =mrshop.store.get(mrshop.CLIENT_CAR_LIST) || []
                     //判断当前将要加入到购物车的数据是否在购物车中
                     let car = carList.find(car =>car.skuId == this.sku.id)
                     if(car){
@@ -663,12 +671,11 @@
                         };
                         carList.push(car);
                     }
-
                     //重置购物车数据
-                    mrshop.store.set("carList",carList);
+                    mrshop.store.set(mrshop.CLIENT_CAR_LIST,carList);
+                    //跳转到新增购物车成功页面,加上HTTP://为了防止url拼接
+                    window.location.href = '../success-cart.html';
                 });
-                //跳转到新增购物车成功页面,加上HTTP://为了防止url拼接
-                window.location.href = '../success-cart.html';
             },
             increment (){
                 if(this.sku.stock > this.num) this.num++;

@@ -186,6 +186,12 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
         return this.setResultSuccess();
     }
 
+    @Override
+    public Result<SkuEntity> getSkuBySkuId(Long skuId) {
+        SkuEntity skuEntity = skuMapper.selectByPrimaryKey(skuId);
+        return this.setResultSuccess(skuEntity);
+    }
+
     public void saveSkuAndStock(List<SkuDTO> skus, Integer spuId, Date date){
         skus.stream().forEach(skuDTO -> {
             //新增sku

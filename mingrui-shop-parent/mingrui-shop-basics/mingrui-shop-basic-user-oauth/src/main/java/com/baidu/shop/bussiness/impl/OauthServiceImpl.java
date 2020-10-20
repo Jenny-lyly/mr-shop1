@@ -2,7 +2,7 @@ package com.baidu.shop.bussiness.impl;
 
 import com.baidu.shop.bussiness.OauthService;
 import com.baidu.shop.config.JwtConfig;
-import com.baidu.shop.constant.PhoneConstant;
+import com.baidu.shop.constant.MrShopConstant;
 import com.baidu.shop.dto.UserInfo;
 import com.baidu.shop.entity.UserEntity;
 import com.baidu.shop.mapper.UserOauthMapper;
@@ -33,7 +33,7 @@ public class OauthServiceImpl implements OauthService {
 
         String tocken = null;
 
-        Pattern p = Pattern.compile(PhoneConstant.PHONE_NUMBER_REG);
+        Pattern p = Pattern.compile(MrShopConstant.PHONE_NUMBER_REG);
         Matcher m = p.matcher(userEntity.getUsername());
         boolean isMatch = m.matches();
 

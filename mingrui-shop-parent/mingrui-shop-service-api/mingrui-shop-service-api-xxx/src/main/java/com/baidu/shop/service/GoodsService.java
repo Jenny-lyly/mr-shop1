@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baidu.shop.base.Result;
 import com.baidu.shop.dto.SkuDTO;
 import com.baidu.shop.dto.SpuDTO;
+import com.baidu.shop.entity.SkuEntity;
 import com.baidu.shop.entity.SpuDetailEntity;
 import com.baidu.shop.validate.group.MrOperation;
 import io.swagger.annotations.Api;
@@ -51,4 +52,8 @@ public interface GoodsService {
     @ApiOperation("修改商品状态信息是否上架")
     @PutMapping("goods/isSaleable")
     Result<JSONObject> isSaleable(@RequestBody SpuDTO spuDTO);
+
+    @ApiOperation(value = "通过skuID获取sku信息")
+    @GetMapping(value = "goods/getSkuBySkuId")
+    Result<SkuEntity> getSkuBySkuId(@RequestParam  Long skuId);
 }
