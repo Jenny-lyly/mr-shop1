@@ -7,6 +7,7 @@ import com.baidu.shop.config.JwtConfig;
 import com.baidu.shop.constant.MrShopConstant;
 import com.baidu.shop.dto.Car;
 import com.baidu.shop.dto.OrderDTO;
+import com.baidu.shop.dto.OrderInfo;
 import com.baidu.shop.dto.UserInfo;
 import com.baidu.shop.entity.OrderDetailEntity;
 import com.baidu.shop.entity.OrderEntity;
@@ -15,10 +16,13 @@ import com.baidu.shop.mapper.OrderDetailMapper;
 import com.baidu.shop.mapper.OrderMapper;
 import com.baidu.shop.mapper.OrderStatusMapper;
 import com.baidu.shop.repository.RedisRepository;
+import com.baidu.shop.status.HTTPStatus;
+import com.baidu.shop.utils.BaiduBeanUtil;
 import com.baidu.shop.utils.IdWorker;
 import com.baidu.shop.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
+import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
 import java.util.Arrays;
@@ -48,6 +52,23 @@ public class OrderServiceImpl extends BaseApiService implements OrderService {
     private IdWorker idWorker;
     @Resource
     private RedisRepository redisRepository;
+
+    @Override
+    public Result<OrderInfo> getOrderInfoByOrderId(Long orderId) {
+
+        OrderEntity orderEntity = orderMapper.selectByPrimaryKey(orderId);
+        OrderInfo orderInfo = BaiduBeanUtil.copyProperties(orderEntity, OrderInfo.class);
+
+        Example example = new Example(OrderDetailEntity.class);
+        example.createCriteria().andEqualTo("orderId",orderId);
+        List<OrderDetailEntity> orderDetailList = orderDetailMapper.selectByExample(example);
+        orderInfo.setOrderDetailList(orderDetailList);
+
+        orderInfo.setOrderStatusEntity(orderStatusMapper.selectByPrimaryKey(orderId));
+
+        return this.setResultSuccess(orderInfo);
+    }
+
     @Override
     public Result<String> createOrder(OrderDTO orderDTO,String token) {
         //detail,entity,statue
@@ -105,7 +126,7 @@ public class OrderServiceImpl extends BaseApiService implements OrderService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("=====");
-        return this.setResultSuccess();
+
+        return this.setResult(HTTPStatus.OK,"",orderId + "");
     }
 }
