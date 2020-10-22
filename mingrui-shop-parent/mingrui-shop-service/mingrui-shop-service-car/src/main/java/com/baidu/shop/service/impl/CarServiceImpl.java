@@ -45,8 +45,8 @@ public class CarServiceImpl extends BaseApiService implements CarService {
     private GoodsFeign goodsFeign;
     @Resource
     private JwtConfig jwtConfig;
-    @Resource
-    private SpecificationFeign specificationFeign;
+//    @Resource
+//    private SpecificationFeign specificationFeign;
 
 
     @Override
@@ -117,6 +117,7 @@ public class CarServiceImpl extends BaseApiService implements CarService {
                 log.debug("当前用户购物车中有将要新增的商品，重新设置num : {}" , redisCar.getNum());
              }else{//当前用户购物车中没有将要新增的商品信息
                 if(skuResult.getCode() == 200){
+
 
                     SkuEntity skuEntity = skuResult.getData();
                     car.setTitle(skuEntity.getTitle());
